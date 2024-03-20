@@ -13,7 +13,7 @@ type logic_op =
   | Or
 
 type ident = string
-type type_ = string
+type type_ = Type.t
 
 type expr =
   | Number of int
