@@ -21,8 +21,8 @@ let test_cases = [
   ("number", "565");
   ("boolean_1", "true");
   ("boolean_2", "false");
-  (*
   ("plus", "(+ 1 2)");
+  (*
   ("minus", "(- 1 2)");
   ("times", "(* 1 2)");
   ("divide", "(/ 1 2)");

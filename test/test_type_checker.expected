@@ -7,3 +7,6 @@
 --- boolean_2 ---
 (type (boolean))
 
+--- plus ---
+(type (number))
+
