@@ -22,6 +22,10 @@ let from_s_expr input: (Ast.expr, string) result =
     String.for_all ~f:Char.is_digit str
   in
 
+  let is_ident str =
+    String.for_all ~f:Char.is_alpha str
+  in
+
   let is_op ~ops input_op =
     List.exists ~f:(
       fun (op) -> String.compare input_op op = 0
@@ -75,6 +79,8 @@ let from_s_expr input: (Ast.expr, string) result =
     | Atom value when is_number value ->
       let num = int_of_string value in
       Ok (Ast.Number num)
+    | Atom ident when is_ident ident ->
+      Ok (Ast.Ident ident)
     | List [
       Atom op;
       lhs;

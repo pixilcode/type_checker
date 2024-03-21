@@ -40,3 +40,12 @@
 --- let ---
 (type (number))
 
+--- let_ident ---
+(type (number))
+
+--- let_multi ---
+(type (number))
+
+--- let_nested ---
+(type (number))
+

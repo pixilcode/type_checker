@@ -99,6 +99,18 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
     >>= fun (env) ->
       check body ~env
   end
+  | Ast.Ident ident -> begin
+    let ident_type = Env.get ~ident env in
+    match ident_type with
+    | Some ident_type -> Ok (ident_type, env)
+    | None ->
+      let message =
+        Printf.sprintf
+          "Undefined identifier '%s'"
+          ident
+      in
+      error message
+  end
   | _ -> failwith "unimplemented"
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in
