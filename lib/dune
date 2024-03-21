@@ -1,2 +1,3 @@
 (library
- (name type_checker))
+ (name type_checker)
+ (libraries core))

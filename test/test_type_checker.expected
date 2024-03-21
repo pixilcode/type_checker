@@ -1,0 +1,9 @@
+--- number ---
+(type (number))
+
+--- boolean_1 ---
+(type (boolean))
+
+--- boolean_2 ---
+(type (boolean))
+
