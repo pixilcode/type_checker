@@ -45,4 +45,20 @@ let rec check ast: (Type.t, string) result =
       in
       error message
   end
+  | Ast.BinaryLogic (lhs, _, rhs) -> begin
+    check lhs >>= fun (lhs_type) ->
+    check rhs >>= fun (rhs_type) ->
+    match (lhs_type, rhs_type) with
+    | (Type.Bool, Type.Bool) -> Ok (Type.Bool)
+    | _ ->
+      let lhs_type_string = Printer.type_to_string lhs_type in
+      let rhs_type_string = Printer.type_to_string rhs_type in
+      let message =
+        Printf.sprintf
+          "Invalid types %s and %s for logical operator"
+          lhs_type_string
+          rhs_type_string
+      in
+      error message
+  end
   | _ -> failwith "unimplemented"

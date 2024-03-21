@@ -25,3 +25,9 @@
 --- less_than ---
 (type (boolean))
 
+--- and ---
+(type (boolean))
+
+--- or ---
+(type (boolean))
+

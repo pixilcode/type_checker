@@ -27,9 +27,9 @@ let test_cases = [
   ("divide", "(/ 1 2)");
   ("equal", "(= 1 2)");
   ("less_than", "(< 1 2)");
-  (*
   ("and", "(and true false)");
   ("or", "(or true false)");
+  (*
   ("not", "(not true)");
   ("if", "(if true 1 2)");
   ("if", "(if false 1 2)");

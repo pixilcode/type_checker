@@ -51,6 +51,18 @@ let from_s_expr input: (Ast.expr, string) result =
     | _ -> failwith ("Invalid compare op '" ^ input_op ^ "'")
   in
 
+  let is_logic_op input_op =
+    let ops = ["and"; "or"] in
+    is_op ~ops input_op
+  in
+
+  let parse_logic_op input_op =
+    match input_op with
+    | "and" -> Ast.And
+    | "or" -> Ast.Or
+    | _ -> failwith ("Invalid logic op '" ^ input_op ^ "'")
+  in
+
   let rec parse_expr input: (Ast.expr, string) result =
     let open Sexp in
     let open Result.Monad_infix in
@@ -83,6 +95,20 @@ let from_s_expr input: (Ast.expr, string) result =
       parse_expr rhs >>= fun (parsed_rhs) ->
       let parsed_op = parse_compare_op op in
       let ast = Ast.BinaryCompare (
+        parsed_lhs,
+        parsed_op,
+        parsed_rhs
+      ) in
+      Ok ast
+    | List [
+      Atom op;
+      lhs;
+      rhs;
+    ] when is_logic_op op ->
+      parse_expr lhs >>= fun (parsed_lhs) ->
+      parse_expr rhs >>= fun (parsed_rhs) ->
+      let parsed_op = parse_logic_op op in
+      let ast = Ast.BinaryLogic (
         parsed_lhs,
         parsed_op,
         parsed_rhs
