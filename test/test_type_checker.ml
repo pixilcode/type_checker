@@ -2,13 +2,17 @@ open Core
 open Type_checker
 
 let run_test_case (case_name, case_input) =
+  let open Result.Monad_infix in
   print_endline ("--- " ^ case_name ^ " ---");
+
+  let env = Env.empty () in
 
   let result = 
     case_input
     |> Parser.from_s_expr
-    |> Result.bind ~f:Checker.check
-    |> Result.map ~f:Printer.type_to_string
+    >>= Checker.check ~env
+    >>| fst
+    >>| Printer.type_to_string
     |> Result.map_error ~f:Printer.error_to_string
   in
   match result with
@@ -32,7 +36,8 @@ let test_cases = [
   ("not", "(not true)");
   ("if", "(if true 1 2)");
   (*
-  ("let", "(let ([x 1]) x)");
+  ("let", "(let ([x 1]) 1)");
+  ("let_ident", "(let ([x 1]) x)");
   ("let_nested", "(let x 1 (let y 2 (+ x y)))");
   ("fn_expr", "(fun (x : number) x)");
   ("fn_app", "((fun (x : number) x) 1)");

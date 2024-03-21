@@ -1,6 +1,6 @@
 open Core
 
-let rec check ast: (Type.t, string) result =
+let rec check ast ~env : (Type.t * Env.t, string) result =
   let error message: ('a, string) result =
     let message = (
       "Squishy bananas! " ^
@@ -11,13 +11,13 @@ let rec check ast: (Type.t, string) result =
 
   let open Result.Monad_infix in
   match ast with
-  | Ast.Number _ -> Ok Type.Num
-  | Ast.Boolean _ -> Ok Type.Bool
+  | Ast.Number _ -> Ok (Type.Num, env)
+  | Ast.Boolean _ -> Ok (Type.Bool, env)
   | Ast.BinaryMath (lhs, _, rhs) -> begin
-    check lhs >>= fun (lhs_type) ->
-    check rhs >>= fun (rhs_type) ->
+    check lhs ~env >>= fun (lhs_type, env) ->
+    check rhs ~env >>= fun (rhs_type, env) ->
     match (lhs_type, rhs_type) with
-    | (Type.Num, Type.Num) -> Ok (Type.Num)
+    | (Type.Num, Type.Num) -> Ok (Type.Num, env)
     | _ ->
       let lhs_type_string = Printer.type_to_string lhs_type in
       let rhs_type_string = Printer.type_to_string rhs_type in
@@ -30,10 +30,10 @@ let rec check ast: (Type.t, string) result =
       error message
   end
   | Ast.BinaryCompare (lhs, _, rhs) -> begin
-    check lhs >>= fun (lhs_type) ->
-    check rhs >>= fun (rhs_type) ->
+    check lhs ~env >>= fun (lhs_type, env) ->
+    check rhs ~env >>= fun (rhs_type, env) ->
     match (lhs_type, rhs_type) with
-    | (Type.Num, Type.Num) -> Ok (Type.Bool)
+    | (Type.Num, Type.Num) -> Ok (Type.Bool, env)
     | _ ->
       let lhs_type_string = Printer.type_to_string lhs_type in
       let rhs_type_string = Printer.type_to_string rhs_type in
@@ -46,10 +46,10 @@ let rec check ast: (Type.t, string) result =
       error message
   end
   | Ast.BinaryLogic (lhs, _, rhs) -> begin
-    check lhs >>= fun (lhs_type) ->
-    check rhs >>= fun (rhs_type) ->
+    check lhs ~env >>= fun (lhs_type, env) ->
+    check rhs ~env >>= fun (rhs_type, env) ->
     match (lhs_type, rhs_type) with
-    | (Type.Bool, Type.Bool) -> Ok (Type.Bool)
+    | (Type.Bool, Type.Bool) -> Ok (Type.Bool, env)
     | _ ->
       let lhs_type_string = Printer.type_to_string lhs_type in
       let rhs_type_string = Printer.type_to_string rhs_type in
@@ -62,9 +62,9 @@ let rec check ast: (Type.t, string) result =
       error message
   end
   | Ast.Not rhs -> begin
-    check rhs >>= fun (rhs_type) ->
+    check rhs ~env >>= fun (rhs_type, env) ->
     match rhs_type with
-    | Type.Bool -> Ok (Type.Bool)
+    | Type.Bool -> Ok (Type.Bool, env)
     | _ ->
       let rhs_type_string = Printer.type_to_string rhs_type in
       let message =
@@ -75,13 +75,13 @@ let rec check ast: (Type.t, string) result =
       error message
   end
   | Ast.If (cond, then_, else_) -> begin
-    check cond >>= fun (cond_type) ->
-    check then_ >>= fun (then_type) ->
-    check else_ >>= fun (else_type) ->
+    check cond ~env >>= fun (cond_type, env) ->
+    check then_ ~env >>= fun (then_type, env) ->
+    check else_ ~env >>= fun (else_type, env) ->
     match cond_type with
     | Type.Bool ->
       if Type.equal' then_type else_type then
-        Ok then_type
+        Ok (then_type, env)
       else
         error "Branches of if expression should be the same!"
     | _ ->
