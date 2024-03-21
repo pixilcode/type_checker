@@ -19,3 +19,9 @@
 --- divide ---
 (type (number))
 
+--- equal ---
+(type (boolean))
+
+--- less_than ---
+(type (boolean))
+

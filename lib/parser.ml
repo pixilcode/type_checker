@@ -29,7 +29,28 @@ let from_s_expr input: (Ast.expr, string) result =
     let ops = ["+"; "-"; "*"; "/"] in
     is_op ~ops input_op
   in
-  
+
+  let parse_math_op input_op =
+    match input_op with
+    | "+" -> Ast.Add
+    | "-" -> Ast.Subtract
+    | "*" -> Ast.Multiply
+    | "/" -> Ast.Divide
+    | _ -> failwith ("Invalid math op '" ^ input_op ^ "'")
+  in
+
+  let is_compare_op input_op =
+    let ops = ["="; "<"] in
+    is_op ~ops input_op
+  in
+
+  let parse_compare_op input_op =
+    match input_op with
+    | "=" -> Ast.Equal
+    | "<" -> Ast.LessThan
+    | _ -> failwith ("Invalid compare op '" ^ input_op ^ "'")
+  in
+
   let rec parse_expr input: (Ast.expr, string) result =
     let open Sexp in
     let open Result.Monad_infix in
@@ -46,9 +67,24 @@ let from_s_expr input: (Ast.expr, string) result =
     ] when is_math_op op ->
       parse_expr lhs >>= fun (parsed_lhs) ->
       parse_expr rhs >>= fun (parsed_rhs) ->
+      let parsed_op = parse_math_op op in
       let ast = Ast.BinaryMath (
         parsed_lhs,
-        Ast.Add,
+        parsed_op,
+        parsed_rhs
+      ) in
+      Ok ast
+    | List [
+      Atom op;
+      lhs;
+      rhs;
+    ] when is_compare_op op ->
+      parse_expr lhs >>= fun (parsed_lhs) ->
+      parse_expr rhs >>= fun (parsed_rhs) ->
+      let parsed_op = parse_compare_op op in
+      let ast = Ast.BinaryCompare (
+        parsed_lhs,
+        parsed_op,
         parsed_rhs
       ) in
       Ok ast
