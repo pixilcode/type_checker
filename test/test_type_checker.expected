@@ -52,3 +52,9 @@
 --- fn_expr ---
 (type (-> (number) (number)))
 
+--- fn_app ---
+(type (number))
+
+--- sequence ---
+(type (boolean))
+

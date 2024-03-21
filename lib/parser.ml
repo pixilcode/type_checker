@@ -260,6 +260,18 @@ let from_s_expr input: (Ast.expr, string) result =
         parsed_fn_arg
       ) in
       Ok fn_app_expr
+    | List [
+      Atom "begin";
+      first_expr;
+      second_expr;
+    ] ->
+      parse_expr first_expr >>= fun (parsed_first_expr) ->
+      parse_expr second_expr >>= fun (parsed_second_expr) ->
+      let begin_expr = Ast.Sequence (
+        parsed_first_expr,
+        parsed_second_expr
+      ) in
+      Ok begin_expr
     | expr -> parse_expr_error expr
   and parse_decls decls =
     let open Result.Monad_infix in

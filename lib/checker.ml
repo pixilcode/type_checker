@@ -143,6 +143,10 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
       in
       error message
   end
+  | Ast.Sequence (first_expr, second_expr) ->
+    let first_expr_env = Env.copy env in
+    check first_expr ~env:first_expr_env >>= fun (_, _) ->
+    check second_expr ~env
   | _ -> failwith "unimplemented"
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in
