@@ -74,4 +74,23 @@ let rec check ast: (Type.t, string) result =
       in
       error message
   end
+  | Ast.If (cond, then_, else_) -> begin
+    check cond >>= fun (cond_type) ->
+    check then_ >>= fun (then_type) ->
+    check else_ >>= fun (else_type) ->
+    match cond_type with
+    | Type.Bool ->
+      if Type.equal' then_type else_type then
+        Ok then_type
+      else
+        error "Branches of if expression should be the same!"
+    | _ ->
+      let cond_type_string = Printer.type_to_string cond_type in
+      let message =
+        Printf.sprintf
+          "Invalid type %s for if condition"
+          cond_type_string
+      in
+      error message
+  end
   | _ -> failwith "unimplemented"

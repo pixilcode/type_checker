@@ -30,9 +30,8 @@ let test_cases = [
   ("and", "(and true false)");
   ("or", "(or true false)");
   ("not", "(not true)");
-  (*
   ("if", "(if true 1 2)");
-  ("if", "(if false 1 2)");
+  (*
   ("let", "(let ([x 1]) x)");
   ("let_nested", "(let x 1 (let y 2 (+ x y)))");
   ("fn_expr", "(fun (x : number) x)");

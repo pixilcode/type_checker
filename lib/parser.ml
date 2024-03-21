@@ -120,6 +120,21 @@ let from_s_expr input: (Ast.expr, string) result =
     ] ->
       parse_expr rhs >>= fun (parsed_rhs) ->
       Ok (Ast.Not parsed_rhs)
+    | List [
+      Atom "if";
+      cond;
+      then_;
+      else_;
+    ] ->
+      parse_expr cond >>= fun (parsed_cond) ->
+      parse_expr then_ >>= fun (parsed_then) ->
+      parse_expr else_ >>= fun (parsed_else) ->
+      let ast = Ast.If (
+        parsed_cond,
+        parsed_then,
+        parsed_else
+      ) in
+      Ok ast
     | expr -> parse_error expr
   in
 
