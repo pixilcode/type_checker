@@ -10,3 +10,12 @@
 --- plus ---
 (type (number))
 
+--- minus ---
+(type (number))
+
+--- times ---
+(type (number))
+
+--- divide ---
+(type (number))
+

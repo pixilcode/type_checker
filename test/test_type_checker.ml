@@ -22,10 +22,10 @@ let test_cases = [
   ("boolean_1", "true");
   ("boolean_2", "false");
   ("plus", "(+ 1 2)");
-  (*
   ("minus", "(- 1 2)");
   ("times", "(* 1 2)");
   ("divide", "(/ 1 2)");
+  (*
   ("equal", "(= 1 2)");
   ("less_than", "(< 1 2)");
   ("and", "(and true false)");
