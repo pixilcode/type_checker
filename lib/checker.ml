@@ -111,6 +111,15 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
       in
       error message
   end
+  | Ast.FnExpr (ident, ident_type, body) ->
+    let fn_env =
+      env
+      |> Env.copy
+      |> Env.set ~ident ~value:ident_type
+    in
+    check body ~env:fn_env >>= fun (body_type, _body_env) ->
+    let fn_expr_type = Type.Fn (ident_type, body_type) in
+    Ok (fn_expr_type, env)
   | _ -> failwith "unimplemented"
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in

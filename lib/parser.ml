@@ -1,5 +1,4 @@
 open Core
-open Sexplib
 
 let error message: ('a, string) result =
   let message = (
@@ -8,13 +7,21 @@ let error message: ('a, string) result =
   ) in
   Error message
 
-let parse_error expr: ('a, string) result =
-  let expr = Sexp.to_string expr in
-  error ("Unable to parse `" ^ expr ^ "`")
+let parse_error kind s_expr: ('a, string) result =
+  let s_expr = Sexp.to_string s_expr in
+  error ("Unable to parse " ^ kind ^ " `" ^ s_expr ^ "`")
 
-let parse_decl_error expr: ('a, string) result =
-  let expr = Sexp.to_string expr in
-  error ("Unable to parse decl `" ^ expr ^ "`")
+let parse_expr_error expr =
+  parse_error "expr" expr
+
+let parse_decl_error decl =
+  parse_error "decl" decl
+
+let parse_field_error field =
+  parse_error "field" field
+
+let parse_type_error type_ =
+  parse_error "type" type_
 
 let from_s_expr input: (Ast.expr, string) result =
 
@@ -24,6 +31,78 @@ let from_s_expr input: (Ast.expr, string) result =
 
   let is_ident str =
     String.for_all ~f:Char.is_alpha str
+  in
+
+  let rec is_type s_expr =
+    let is_field field =
+      match (field: Sexp.t) with
+      | List [
+        Atom ident;
+        field_type;
+      ] when is_ident ident && is_type field_type ->
+        true
+      | _ -> false
+    in
+
+    match s_expr with
+    | Atom "number"
+    | Atom "bool"
+    | Atom "void" -> true
+    | List [
+      Atom "->";
+      param_type;
+      return_type;
+    ] ->
+      is_type param_type && is_type return_type
+    | List (
+      Atom "object" ::
+      fields
+    ) ->
+      List.for_all fields ~f:is_field
+    | _ -> false
+  in
+
+  let rec parse_type s_expr: (Type.t, string) result =
+    let open Result.Monad_infix in
+
+    let parse_field field: (string * Type.t, string) result =
+      match (field: Sexp.t) with
+      | List [
+        Atom ident;
+        field_type;
+      ] when is_ident ident && is_type field_type ->
+        parse_type field_type >>= fun (parsed_field_type) ->
+        Ok (ident, parsed_field_type)
+      | _ -> parse_field_error field
+    in
+
+    match s_expr with
+    | Atom "number" -> Ok Type.Num
+    | Atom "bool" -> Ok Type.Bool
+    | Atom "void" -> Ok Type.Void
+    | List [
+      Atom "->";
+      param_type;
+      return_type;
+    ] ->
+      parse_type param_type >>= fun (parsed_param_type) ->
+      parse_type return_type >>= fun (parsed_return_type) ->
+      let fn_type = Type.Fn (
+        parsed_param_type,
+        parsed_return_type
+      ) in
+      Ok fn_type
+    | List (
+      Atom "object" ::
+      fields
+    ) ->
+      fields
+      |> List.map ~f:parse_field
+      |> Result.all
+      >>= fun (fields) ->
+      let object_type = Type.Object fields in
+      Ok object_type
+    | _ -> parse_type_error s_expr
   in
 
   let is_op ~ops input_op =
@@ -71,9 +150,8 @@ let from_s_expr input: (Ast.expr, string) result =
   in
 
   let rec parse_expr input: (Ast.expr, string) result =
-    let open Sexp in
     let open Result.Monad_infix in
-    match input with
+    match (input: Sexp.t) with
     | Atom "true" -> Ok (Ast.Boolean true)
     | Atom "false" -> Ok (Ast.Boolean false)
     | Atom value when is_number value ->
@@ -153,13 +231,29 @@ let from_s_expr input: (Ast.expr, string) result =
       parse_expr body >>= fun (parsed_body) ->
       let ast = Ast.Let (parsed_decls, parsed_body) in
       Ok ast
-    | expr -> parse_error expr
+    | List [
+      Atom "fun";
+      List [
+        Atom ident;
+        Atom ":";
+        ident_type;
+      ];
+      body
+    ] when is_ident ident && is_type ident_type ->
+      parse_type ident_type >>= fun (parsed_ident_type) ->
+      parse_expr body >>= fun (parsed_body) ->
+      let fn_expr = Ast.FnExpr (
+        ident,
+        parsed_ident_type,
+        parsed_body
+      ) in
+      Ok fn_expr
+    | expr -> parse_expr_error expr
   and parse_decls decls =
-    let open Sexp in
     let open Result.Monad_infix in
     decls
     |> List.map ~f:(fun (decl) ->
-      match decl with
+      match (decl: Sexp.t) with
       | List [
         Atom ident;
         expr;

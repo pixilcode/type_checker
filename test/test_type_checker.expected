@@ -49,3 +49,6 @@
 --- let_nested ---
 (type (number))
 
+--- fn_expr ---
+(type (-> (number) (number)))
+
