@@ -1,19 +1,22 @@
 open Core
 open Sexplib
 
-let from_s_expr input: (Ast.expr, string) result =
-  let error message: ('a, string) result =
-    let message = (
-      "Squishy bananas! " ^
-      message
-    ) in
-    Error message
-  in
+let error message: ('a, string) result =
+  let message = (
+    "Squishy bananas! " ^
+    message
+  ) in
+  Error message
 
-  let parse_error expr: ('a, string) result =
-    let expr = Sexp.to_string expr in
-    error ("Unable to parse `" ^ expr ^ "`")
-  in
+let parse_error expr: ('a, string) result =
+  let expr = Sexp.to_string expr in
+  error ("Unable to parse `" ^ expr ^ "`")
+
+let parse_decl_error expr: ('a, string) result =
+  let expr = Sexp.to_string expr in
+  error ("Unable to parse decl `" ^ expr ^ "`")
+
+let from_s_expr input: (Ast.expr, string) result =
 
   let is_number str =
     String.for_all ~f:Char.is_digit str
@@ -134,12 +137,36 @@ let from_s_expr input: (Ast.expr, string) result =
         parsed_then,
         parsed_else
       ) in
+     Ok ast
+    | List [
+      Atom "let";
+      List decls;
+      body
+    ] ->
+      parse_decls decls >>= fun (parsed_decls) ->
+      parse_expr body >>= fun (parsed_body) ->
+      let ast = Ast.Let (parsed_decls, parsed_body) in
       Ok ast
     | expr -> parse_error expr
+  and parse_decls decls =
+    let open Sexp in
+    let open Result.Monad_infix in
+    decls
+    |> List.map ~f:(fun (decl) ->
+      match decl with
+      | List [
+        Atom ident;
+        expr;
+      ] ->
+        parse_expr expr >>= fun (parsed_expr) ->
+        Ok (ident, parsed_expr)
+      | decl -> parse_decl_error decl
+    )
+    |> Result.all
   in
 
+  let input = String.substr_replace_all ~pattern:"[" ~with_:"(" input in
+  let input = String.substr_replace_all ~pattern:"]" ~with_:")" input in
   let input = Sexp.of_string input in
   let ast = parse_expr input in
   ast
-
-let a = Sexp.of_string "(hi)"

@@ -93,4 +93,15 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
       in
       error message
   end
+  | Ast.Let (decls, body) -> begin
+    decls
+    |> List.fold_result ~init:env ~f:(fun env decl -> check_decl ~env decl)
+    >>= fun (env) ->
+      check body ~env
+  end
   | _ -> failwith "unimplemented"
+and check_decl (ident, expr) ~env =
+  let open Result.Monad_infix in
+  check expr ~env >>= fun (expr_type, env) ->
+  let env = Env.set ~ident ~value: expr_type env in
+  Ok env

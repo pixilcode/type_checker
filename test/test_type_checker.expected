@@ -37,3 +37,6 @@
 --- if ---
 (type (number))
 
+--- let ---
+(type (number))
+
