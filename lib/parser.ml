@@ -4,7 +4,7 @@ open Sexplib
 let from_s_expr input: (Ast.expr, string) result =
   let error message: ('a, string) result =
     let message = (
-      "Squishy banana! " ^
+      "Squishy bananas! " ^
       message
     ) in
     Error message
