@@ -114,6 +114,12 @@ let from_s_expr input: (Ast.expr, string) result =
         parsed_rhs
       ) in
       Ok ast
+    | List [
+      Atom "not";
+      rhs;
+    ] ->
+      parse_expr rhs >>= fun (parsed_rhs) ->
+      Ok (Ast.Not parsed_rhs)
     | expr -> parse_error expr
   in
 

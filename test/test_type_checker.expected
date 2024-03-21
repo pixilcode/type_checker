@@ -31,3 +31,6 @@
 --- or ---
 (type (boolean))
 
+--- not ---
+(type (boolean))
+

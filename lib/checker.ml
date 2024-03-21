@@ -61,4 +61,17 @@ let rec check ast: (Type.t, string) result =
       in
       error message
   end
+  | Ast.Not rhs -> begin
+    check rhs >>= fun (rhs_type) ->
+    match rhs_type with
+    | Type.Bool -> Ok (Type.Bool)
+    | _ ->
+      let rhs_type_string = Printer.type_to_string rhs_type in
+      let message =
+        Printf.sprintf
+          "Invalid type %s for `not` operator"
+          rhs_type_string
+      in
+      error message
+  end
   | _ -> failwith "unimplemented"
