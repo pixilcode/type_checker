@@ -120,6 +120,29 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
     check body ~env:fn_env >>= fun (body_type, _body_env) ->
     let fn_expr_type = Type.Fn (ident_type, body_type) in
     Ok (fn_expr_type, env)
+  | Ast.FnApp (fn_expr, fn_arg) -> begin
+    check fn_expr ~env >>= fun (fn_expr_type, env) ->
+    check fn_arg ~env >>= fun (fn_arg_type, env) ->
+    match fn_expr_type with
+    | Type.Fn (param_type, return_type) ->
+      if Type.equal' param_type fn_arg_type then
+        Ok (return_type, env)
+      else
+        let message =
+          Printf.sprintf
+            "Function expected arg of type `%s`, found arg of type `%s`"
+            (Printer.type_to_string param_type)
+            (Printer.type_to_string fn_arg_type)
+        in
+        error message
+    | _ ->
+      let message =
+        Printf.sprintf
+          "Type `%s` cannot be applied as a function"
+          (Printer.type_to_string fn_expr_type)
+      in
+      error message
+  end
   | _ -> failwith "unimplemented"
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in

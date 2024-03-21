@@ -248,6 +248,18 @@ let from_s_expr input: (Ast.expr, string) result =
         parsed_body
       ) in
       Ok fn_expr
+    | List [
+      Atom "app";
+      fn_expr;
+      fn_arg;
+    ] ->
+      parse_expr fn_expr >>= fun (parsed_fn_expr) ->
+      parse_expr fn_arg >>= fun (parsed_fn_arg) ->
+      let fn_app_expr = Ast.FnApp (
+        parsed_fn_expr,
+        parsed_fn_arg
+      ) in
+      Ok fn_app_expr
     | expr -> parse_expr_error expr
   and parse_decls decls =
     let open Result.Monad_infix in

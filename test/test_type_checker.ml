@@ -40,9 +40,9 @@ let test_cases = [
   ("let_multi", "(let ([x 1] [y 2]) (+ x y))");
   ("let_nested", "(let ([x 1]) (let ([y 2]) (+ x y)))");
   ("fn_expr", "(fun (x : number) x)");
-  (*
   ("fn_app", "(app (fun (x : number) x) 1)");
   ("sequence", "(begin 1 true)");
+  (*
   ("mutation", "(let ([x 1]) (set! x 2))");
   ("object", "(object [x 1])");
   ("field_access", "(let ([x (object [y 1])]) (field x y))");
