@@ -58,3 +58,6 @@
 --- sequence ---
 (type (boolean))
 
+--- mutation ---
+(type (void))
+

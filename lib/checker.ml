@@ -147,6 +147,30 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
     let first_expr_env = Env.copy env in
     check first_expr ~env:first_expr_env >>= fun (_, _) ->
     check second_expr ~env
+  | Ast.Mutate (ident, expr) -> begin
+    check expr ~env >>= fun (expr_type, _env) ->
+    let expected_type = Env.get ~ident env in
+    match expected_type with
+    | Some expected_type -> 
+      if Type.equal' expected_type expr_type then
+        Ok (Type.Void, env)
+      else
+        let message =
+          Printf.sprintf
+            "Assignment to `%s` expected type `%s` but received type `%s`"
+            ident
+            (Printer.type_to_string expected_type)
+            (Printer.type_to_string expr_type)
+        in
+        error message
+    | None ->
+      let message =
+        Printf.sprintf
+          "`%s` is undefined"
+          ident
+      in
+      error message
+  end
   | _ -> failwith "unimplemented"
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in

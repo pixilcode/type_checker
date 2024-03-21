@@ -272,6 +272,17 @@ let from_s_expr input: (Ast.expr, string) result =
         parsed_second_expr
       ) in
       Ok begin_expr
+    | List [
+      Atom "set!";
+      Atom ident;
+      expr;
+    ] when is_ident ident ->
+      parse_expr expr >>= fun (parsed_expr) ->
+      let set_expr = Ast.Mutate (
+        ident,
+        parsed_expr
+      ) in
+      Ok set_expr
     | expr -> parse_expr_error expr
   and parse_decls decls =
     let open Result.Monad_infix in
