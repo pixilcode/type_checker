@@ -1,5 +1,5 @@
 let error_to_string message =
-  Printf.sprintf "(error \"%s \")" message
+  Printf.sprintf "(error \"%s\")" message
 
 let type_to_string type_ =
   let rec get_type_string type_ =
