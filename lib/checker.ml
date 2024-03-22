@@ -3,7 +3,7 @@ open Core
 let rec check ast ~env : (Type.t * Env.t, string) result =
   let error message: ('a, string) result =
     let message = (
-      "Squishy bananas! " ^
+      "Banana soup! " ^
       message
     ) in
     Error message
