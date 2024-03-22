@@ -45,7 +45,7 @@ let from_s_expr input: (Ast.expr, string) result =
     in
 
     match s_expr with
-    | Atom "number"
+    | Atom "num"
     | Atom "bool"
     | Atom "void" -> true
     | List [
@@ -77,7 +77,7 @@ let from_s_expr input: (Ast.expr, string) result =
     in
 
     match s_expr with
-    | Atom "number" -> Ok Type.Num
+    | Atom "num" -> Ok Type.Num
     | Atom "bool" -> Ok Type.Bool
     | Atom "void" -> Ok Type.Void
     | List [
