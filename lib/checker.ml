@@ -182,7 +182,33 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
     let object_type = Type.Object fields in
     (object_type, env)
   end
-  | _ -> failwith "unimplemented"
+  | Ast.FieldAccess (object_expr, field_ident) -> begin
+    check object_expr ~env >>= fun (object_expr_type, _env) ->
+    match object_expr_type with
+    | Type.Object fields -> begin
+      let matching_field =
+        List.Assoc.find fields ~equal:String.(=) field_ident
+      in
+      match matching_field with
+      | Some field_type ->
+        Ok (field_type, env)
+      | None ->
+        let message =
+          Printf.sprintf
+            "Field `%s` does not exist on type `%s`"
+            field_ident
+            (Printer.type_to_string object_expr_type)
+        in
+        error message
+    end
+    | _ ->
+      let message =
+        Printf.sprintf
+          "Cannot access field of type `%s`"
+          (Printer.type_to_string object_expr_type)
+      in
+      error message
+  end
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in
   check expr ~env >>= fun (expr_type, env) ->

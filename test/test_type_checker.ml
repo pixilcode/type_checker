@@ -44,9 +44,7 @@ let test_cases = [
   ("sequence", "(begin 1 true)");
   ("mutation", "(let ([x 1]) (set! x 2))");
   ("object", "(object [x 1])");
-  (*
   ("field_access", "(let ([x (object [y 1])]) (field x y))");
-  *)
 ]
 
 let () = List.iter ~f:run_test_case test_cases

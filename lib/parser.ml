@@ -293,6 +293,17 @@ let from_s_expr input: (Ast.expr, string) result =
       >>= fun (fields) ->
       let object_expr = Ast.ObjectExpr fields in
       Ok object_expr
+    | List [
+      Atom "field";
+      object_expr;
+      Atom field_ident;
+    ] when is_ident field_ident ->
+      parse_expr object_expr >>= fun (parsed_object_expr) ->
+      let field_expr = Ast.FieldAccess (
+        parsed_object_expr,
+        field_ident
+      ) in
+      Ok field_expr
     | expr -> parse_expr_error expr
   and parse_decls decls =
     let open Result.Monad_infix in
