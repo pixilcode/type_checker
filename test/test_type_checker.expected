@@ -67,3 +67,6 @@
 --- field_access ---
 (type (number))
 
+--- duplicate_fields_error ---
+(error "Soup of bananas! Duplicate field `x` in object")
+

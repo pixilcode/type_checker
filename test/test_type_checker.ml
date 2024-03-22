@@ -45,6 +45,7 @@ let test_cases = [
   ("mutation", "(let ([x 1]) (set! x 2))");
   ("object", "(object [x 1])");
   ("field_access", "(let ([x (object [y 1])]) (field x y))");
+  ("duplicate_fields_error", "(object [x 10] [x 12])");
 ]
 
 let () = List.iter ~f:run_test_case test_cases

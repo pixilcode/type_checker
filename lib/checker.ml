@@ -178,9 +178,25 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
       (field_ident, expr_type)
     )
     |> Result.all
-    >>| fun (fields) ->
-    let object_type = Type.Object fields in
-    (object_type, env)
+    >>= fun (fields) ->
+    let duplicate =
+      List.find_a_dup
+        fields
+        ~compare:(fun (ident_a, _) (ident_b, _) ->
+          String.compare ident_a ident_b
+        )
+    in
+    match duplicate with
+    | Some (ident, _) ->
+      let message = 
+        Printf.sprintf
+          "Duplicate field `%s` in object"
+          ident
+      in
+      error message
+    | None ->
+      let object_type = Type.Object fields in
+      Ok (object_type, env)
   end
   | Ast.FieldAccess (object_expr, field_ident) -> begin
     check object_expr ~env >>= fun (object_expr_type, _env) ->
