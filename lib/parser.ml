@@ -152,8 +152,8 @@ let from_s_expr input: (Ast.expr, string) result =
   let rec parse_expr input: (Ast.expr, string) result =
     let open Result.Monad_infix in
     match (input: Sexp.t) with
-    | Atom "true" -> Ok (Ast.Boolean true)
-    | Atom "false" -> Ok (Ast.Boolean false)
+    | Atom "#true" -> Ok (Ast.Boolean true)
+    | Atom "#false" -> Ok (Ast.Boolean false)
     | Atom value when is_number value ->
       let num = int_of_string value in
       Ok (Ast.Number num)
