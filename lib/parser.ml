@@ -283,6 +283,16 @@ let from_s_expr input: (Ast.expr, string) result =
         parsed_expr
       ) in
       Ok set_expr
+    | List (
+      Atom "object" ::
+      fields
+    ) ->
+      fields
+      |> List.map ~f:parse_field
+      |> Result.all
+      >>= fun (fields) ->
+      let object_expr = Ast.ObjectExpr fields in
+      Ok object_expr
     | expr -> parse_expr_error expr
   and parse_decls decls =
     let open Result.Monad_infix in
@@ -298,6 +308,16 @@ let from_s_expr input: (Ast.expr, string) result =
       | decl -> parse_decl_error decl
     )
     |> Result.all
+  and parse_field field =
+    let open Result.Monad_infix in
+    match field with
+    | List [
+      Atom ident;
+      value
+    ] when is_ident ident ->
+      parse_expr value >>| fun (parsed_value) ->
+      (ident, parsed_value)
+    | _ -> parse_field_error field
   in
 
   let input = String.substr_replace_all ~pattern:"[" ~with_:"(" input in

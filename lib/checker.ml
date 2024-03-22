@@ -171,6 +171,17 @@ let rec check ast ~env : (Type.t * Env.t, string) result =
       in
       error message
   end
+  | Ast.ObjectExpr fields -> begin
+    fields
+    |> List.map ~f:(fun (field_ident, expr) ->
+      check expr ~env >>| fun (expr_type, _env) ->
+      (field_ident, expr_type)
+    )
+    |> Result.all
+    >>| fun (fields) ->
+    let object_type = Type.Object fields in
+    (object_type, env)
+  end
   | _ -> failwith "unimplemented"
 and check_decl (ident, expr) ~env =
   let open Result.Monad_infix in
